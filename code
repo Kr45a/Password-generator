@@ -1,0 +1,81 @@
+import random
+import string
+import os
+from typing import Optional
+
+# Константы для наборов символов
+LETTERS = string.ascii_letters  # a-z, A-Z
+DIGITS = string.digits          # 0-9
+SPECIAL_CHARS = "!@#$%^&*()_+-=[]{}|;':\",./<>?"  # Специальные символы
+
+def generate_password(length: int, include_special: bool = False) -> str:
+    """Генерирует пароль заданной длины.
+    
+    Args:
+        length: Длина пароля.
+        include_special: Включить специальные символы.
+    
+    Returns:
+        Сгенерированный пароль.
+    """
+    if include_special:
+        all_chars = LETTERS + DIGITS + SPECIAL_CHARS
+    else:
+        all_chars = LETTERS + DIGITS
+    
+    password = ''.join(random.choice(all_chars) for _ in range(length))
+    return password
+
+def save_to_file(password: str, filename: str = 'passwords.txt') -> None:
+    """Сохраняет пароль в текстовый файл на рабочем столе.
+    
+    Args:
+        password: Пароль для сохранения.
+        filename: Имя файла (по умолчанию passwords.txt).
+    """
+    # Получаем путь к рабочему столу (кросс-платформенно)
+    desktop_path = os.path.join(os.path.expanduser("~"), "Desktop", filename)
+    
+    # Создаем директорию, если она не существует (на всякий случай)
+    os.makedirs(os.path.dirname(desktop_path), exist_ok=True)
+    
+    with open(desktop_path, 'a', encoding='utf-8') as file:
+        file.write(password + '\n')
+    
+    print(f"Пароль '{password}' сохранен в файл на рабочем столе: {desktop_path}")
+
+def main() -> None:
+    """Основная функция программы."""
+    try:
+        length_input = input("Введите длину пароля (минимум 8 символов): ").strip()
+        length = int(length_input)
+        if length < 8:
+            print("Длина пароля должна быть не менее 8 символов. Устанавливаем 8.")
+            length = 8
+        
+        include_special_input = input("Включить специальные символы? (y/n или да/нет): ").lower().strip()
+        include_special = include_special_input in ['y', 'yes', 'да', 'д']
+        
+        if include_special:
+            print("Специальные символы включены (например, !@#$%^&*).")
+        else:
+            print("Специальные символы отключены (только буквы и цифры).")
+        
+        password = generate_password(length, include_special)
+        print(f"Сгенерированный пароль: {password}")
+        
+        # Проверка на точки и запятые (как указано в запросе)
+        if '.' in password or ',' in password:
+            print("Внимание: пароль содержит точку или запятую.")
+        else:
+            print("Пароль не содержит точек или запятых.")
+        
+        save_to_file(password)
+        
+    except ValueError:
+        print("Ошибка: введите целое число для длины пароля.")
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
+
+if __name__ == "__main__":
+    main()
